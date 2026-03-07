@@ -985,27 +985,38 @@ body.reduce-motion.unicorn-mega #g-balloons, body.reduce-motion.unicorn-mega #g-
             z-index: 5;
         }
         #g-trail .trail-title{ font-weight: 900; letter-spacing: 1px; font-size: 15px; }
-        #g-trail .trail-sub{ margin-top: 4px; color:#cfcfcf; font-size: 0.82rem; }
+        #g-trail .trail-sub{ margin-top: 4px; color:#cfcfcf; font-size: 0.82rem; line-height: 1.25; }
         #g-trail .trail-row{ margin-top: 6px; display:flex; gap: 8px; align-items:center; flex-wrap:wrap; }
+        #g-trail .trail-row-secondary{ margin-top: 8px; }
         #g-trail .trail-spacer{ flex: 1; }
-        #g-trail .trail-mode{ padding: 10px 12px; font-size:  13px; }
-        #g-trail .trail-action{ padding: 10px 12px; font-size:  13px; }
+        #g-trail .trail-mode{ padding: 10px 12px; font-size: 13px; }
+        #g-trail .trail-action{ padding: 10px 12px; font-size: 13px; }
+        #g-trail #trail-snap-btn{ min-width: 48px; font-size: 18px; line-height: 1; }
         #g-trail .trail-active{ background: rgba(0,229,255,0.20); border-color: rgba(0,229,255,0.52); }
+        #g-trail .trail-soft-active{ background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.24); }
 
         #g-trail .trail-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
         #g-trail .trail-top-actions{ display:flex; align-items:center; gap:10px; }
         #g-trail .trail-quick-next{ padding: 10px 14px; font-size: 13px; font-weight: 900; }
-        #g-trail .trail-menu-btn{ padding: 10px 14px; font-size:  16px; line-height: 1; }
-        #g-trail .trail-quick-erase{ padding: 10px 14px; font-size:  13px; font-weight: 900; }
+        #g-trail .trail-menu-btn{ padding: 10px 14px; font-size: 16px; line-height: 1; }
+        #g-trail .trail-quick-erase{ padding: 10px 14px; font-size: 13px; font-weight: 900; }
         #g-trail .trail-hud.trail-collapsed{ padding: 6px 10px; }
         #g-trail .trail-hud.trail-collapsed .trail-sub,
         #g-trail .trail-hud.trail-collapsed .trail-row{ display:none; }
         #g-trail .trail-hud.trail-collapsed .trail-title{ font-size: 14px; }
-
+        
         #trail-canvas{
             position:absolute; left:0; top:0;
             width: 100%; height: 100%;
             touch-action: none;
+        }
+
+        @media (max-width: 520px){
+            #g-trail .trail-mode, #g-trail .trail-action{
+                padding: 9px 10px;
+                font-size: 12px;
+            }
+            #g-trail .trail-top-actions{ gap: 8px; }
         }
 
         
@@ -1129,7 +1140,7 @@ body.reduce-motion.unicorn-mega #g-balloons, body.reduce-motion.unicorn-mega #g-
         <canvas id="feedback-confetti" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
     </div>
 
-    <button id="global-settings-btn" class="ui-btn" onclick="ArcadeSettings.openModal()" title="Settings" aria-label="Settings">⚙️</button>
+    <button id="global-settings-btn" class="ui-btn" onclick="ArcadeSettings.openModal()" title="Settings" aria-label="Settings" style="display:none !important" tabindex="-1" aria-hidden="true">⚙️</button>
 
     <div id="global-settings-modal" role="dialog" aria-modal="true" aria-label="Arcade settings">
         <div class="settings-panel">
@@ -1178,34 +1189,43 @@ body.reduce-motion.unicorn-mega #g-balloons, body.reduce-motion.unicorn-mega #g-
     </div>
 
     <div id="g-trail" class="game-view">
-        <button class="back-btn" onclick="goToMenu()">← Menu</button>
-        <div class="trail-wrap">
-            <div class="trail-hud trail-collapsed">
-                <div class="trail-top">
-                    <div class="trail-title">Trail Painter</div>
-                    <div class="trail-top-actions">
-                        <button class="ui-btn trail-action trail-menu-btn" id="trail-menu-btn" title="Menu">☰</button>
-                        <button class="ui-btn trail-action trail-quick-next" id="trail-quick-next" style="display:none" title="Next Stencil">Next</button>
-                        <button class="ui-btn trail-action trail-quick-erase" id="trail-quick-erase" style="display:none" title="Erase / Clear">Erase</button>
-                    </div>
-                </div>
-                <div class="trail-sub">Draw a rainbow ribbon. Lift to watch it snake away.</div>
-                <div class="trail-row">
-                    <button class="ui-btn trail-mode trail-active" data-trail-mode="lift">Lift</button>
-                    <button class="ui-btn trail-mode" data-trail-mode="lcd">LCD</button>
-                    <button class="ui-btn trail-mode" data-trail-mode="stencil">Stencils</button>
-                    <button class="ui-btn trail-mode" data-trail-mode="mirror">Mirror</button>
-                    <button class="ui-btn trail-mode" data-trail-mode="quad">Quad</button>
-                    <button class="ui-btn trail-mode" data-trail-mode="pop">Pop!</button>
-                    <div class="trail-spacer"></div>
-                    <button class="ui-btn trail-action" id="trail-width-btn">WIDE</button>
-                    <button class="ui-btn trail-action" id="trail-erase-btn" style="display:none">Erase</button>
-                    <button class="ui-btn trail-action" id="trail-next-btn" style="display:none">Next</button>
+    <button class="back-btn" onclick="goToMenu()">← Menu</button>
+    <div class="trail-wrap">
+        <div class="trail-hud trail-collapsed">
+            <div class="trail-top">
+                <div class="trail-title">Trail Painter</div>
+                <div class="trail-top-actions">
+                    <button class="ui-btn trail-action trail-menu-btn" id="trail-menu-btn" title="Controls" aria-label="Toggle controls">☰</button>
+                    <button class="ui-btn trail-action trail-quick-next" id="trail-quick-next" style="display:none" title="Next action">Next</button>
+                    <button class="ui-btn trail-action trail-quick-erase" id="trail-quick-erase" style="display:none" title="Erase / Clear">Erase</button>
                 </div>
             </div>
-            <canvas id="trail-canvas"></canvas>
+            <div class="trail-sub">Draw a rainbow ribbon. Lift to watch it snake away.</div>
+            <div class="trail-row">
+                <button class="ui-btn trail-mode trail-active" data-trail-mode="lift">Lift</button>
+                <button class="ui-btn trail-mode" data-trail-mode="lcd">LCD</button>
+                <button class="ui-btn trail-mode" data-trail-mode="stencil">Stencils</button>
+                <button class="ui-btn trail-mode" data-trail-mode="mirror">Mirror ↔</button>
+                <button class="ui-btn trail-mode" data-trail-mode="vmirror">Mirror ↕</button>
+                <button class="ui-btn trail-mode" data-trail-mode="quad">Quad</button>
+                <button class="ui-btn trail-mode" data-trail-mode="custom">DIY</button>
+                <button class="ui-btn trail-mode" data-trail-mode="pop">Pop!</button>
+            </div>
+            <div class="trail-row trail-row-secondary">
+                <button class="ui-btn trail-action trail-soft-active" id="trail-lift-toggle">☐ Lift</button>
+                <button class="ui-btn trail-action" id="trail-width-btn">WIDTH</button>
+                <button class="ui-btn trail-action" id="trail-undo-btn">Undo</button>
+                <button class="ui-btn trail-action" id="trail-snap-btn" title="Save image" aria-label="Save image">📷</button>
+                <button class="ui-btn trail-action" id="trail-bg-btn">BG: Dark</button>
+                <button class="ui-btn trail-action trail-active" id="trail-guides-btn">Guides</button>
+                <div class="trail-spacer"></div>
+                <button class="ui-btn trail-action" id="trail-erase-btn" style="display:none">Erase</button>
+                <button class="ui-btn trail-action" id="trail-next-btn" style="display:none">Next</button>
+            </div>
         </div>
+        <canvas id="trail-canvas"></canvas>
     </div>
+</div>
 
 <script>
 
@@ -1584,16 +1604,20 @@ const FeedbackSys = (function(){
 
     const TrailGame=(function(){
 let canvas,ctx,active=false,raf=null;
-let dpr=1,w=0,h=0;
+let dpr=1,w=0,h=0,prevW=0,prevH=0;
 let strokes=[];
 let activePointers=new Map();
 let mode="lift";
+let liftPlus=false;
+let showGuides=true;
 let modeBtns=null,eraseBtn=null,nextBtn=null,widthBtn=null,subEl=null,quickEraseBtn=null,quickNextBtn=null;
-let hudEl=null,menuBtnEl=null;
+let hudEl=null,liftToggleBtn=null,undoBtn=null,snapBtn=null,guidesBtn=null,bgBtn=null;
 let widthMode=0;
-let particles=[]; 
+let bgMode="dark";
+let particles=[];
 const widthFactors=[3,4.8,7.2,20.25];
 let stencilIndex=0;
+const customMirror={a:null,b:null,ready:false,stage:0};
 const stencils=[
 {name:"Star",draw:(c)=>{const r=0.46;const pts=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5;const rr=(i%2===0)?r:r*0.42;pts.push({x:Math.cos(a)*rr,y:Math.sin(a)*rr});}c.beginPath();c.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)c.lineTo(pts[i].x,pts[i].y);c.closePath();c.stroke();}},
 {name:"Heart",draw:(c)=>{c.beginPath();c.moveTo(0,-0.15);c.bezierCurveTo(0.35,-0.45,0.55,-0.05,0,0.46);c.bezierCurveTo(-0.55,-0.05,-0.35,-0.45,0,-0.15);c.closePath();c.stroke();}},
@@ -1606,125 +1630,249 @@ const stencils=[
 {name:"Planet",draw:(c)=>{c.beginPath();c.arc(0,0,0.28,0,Math.PI*2);c.stroke();c.save();c.rotate(-0.35);c.beginPath();c.ellipse(0,0,0.50,0.18,0,0,Math.PI*2);c.stroke();c.restore();}},
 {name:"Crown",draw:(c)=>{c.beginPath();c.moveTo(-0.46,0.35);c.lineTo(-0.30,-0.10);c.lineTo(-0.10,0.15);c.lineTo(0,-0.18);c.lineTo(0.10,0.15);c.lineTo(0.30,-0.10);c.lineTo(0.46,0.35);c.closePath();c.stroke();c.beginPath();c.moveTo(-0.46,0.35);c.lineTo(0.46,0.35);c.stroke();}},
 {name:"Spiral",draw:(c)=>{let a=0,r=0.02;c.beginPath();c.moveTo(r,0);for(let i=0;i<120;i++){a+=Math.PI/22;r+=0.0045;c.lineTo(Math.cos(a)*r,Math.sin(a)*r);}c.stroke();}}
-
 ];
-function clearAll(){strokes=[];particles=[];activePointers.clear();draw();}
-function initDom(){
-modeBtns=[...document.querySelectorAll("#g-trail .trail-mode")];
-eraseBtn=document.getElementById("trail-erase-btn");
-quickEraseBtn=document.getElementById("trail-quick-erase");
-quickNextBtn=document.getElementById("trail-quick-next");
-nextBtn=document.getElementById("trail-next-btn");
-widthBtn=document.getElementById("trail-width-btn");
-subEl=document.querySelector("#g-trail .trail-sub");
-hudEl=document.querySelector("#g-trail .trail-hud");
-menuBtnEl=document.getElementById("trail-menu-btn");
-if(menuBtnEl && hudEl){
-  menuBtnEl.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); hudEl.classList.toggle("trail-collapsed"); });
+
+function doClearAll(){strokes=[];particles=[];activePointers.clear();draw();}
+function hasArt(){return strokes.length>0||particles.length>0;}
+function isLiftActive(){return mode==="lift"||liftPlus;}
+function reflectAcrossCustom(p){
+  if(!customMirror.ready||!customMirror.a||!customMirror.b) return {x:p.x,y:p.y};
+  const ax=customMirror.a.x, ay=customMirror.a.y;
+  const bx=customMirror.b.x, by=customMirror.b.y;
+  const dx=bx-ax, dy=by-ay;
+  const len2=dx*dx+dy*dy;
+  if(len2<1) return {x:p.x,y:p.y};
+  const t=((p.x-ax)*dx+(p.y-ay)*dy)/len2;
+  const projX=ax+t*dx, projY=ay+t*dy;
+  return {x:2*projX-p.x,y:2*projY-p.y};
 }
-for(const b of modeBtns){b.addEventListener("click",()=>setMode(b.dataset.trailMode));}
-eraseBtn.addEventListener("click",()=>{if(mode==="lcd"||mode==="stencil"||mode==="mirror"||mode==="quad"||mode==="pop"){clearAll();}});
-if(quickEraseBtn){ quickEraseBtn.addEventListener("click",()=>{ clearAll(); }); }
-nextBtn.addEventListener("click",()=>{if(mode==="stencil"){stencilIndex=(stencilIndex+1)%stencils.length;strokes=[];activePointers.clear();draw();}});
-if(quickNextBtn){ quickNextBtn.addEventListener("click",()=>{ if(mode==="stencil"){ stencilIndex=(stencilIndex+1)%stencils.length; strokes=[]; particles=[]; activePointers.clear(); draw(); } }); }
-if(widthBtn){
-  const syncWidthBtn=()=>{ widthBtn.textContent = `WIDTH ${widthMode+1}/4`; widthBtn.classList.toggle('trail-active', widthMode>0); };
-  widthBtn.addEventListener('click',()=>{ widthMode=(widthMode+1)%4; syncWidthBtn(); draw(); });
-  syncWidthBtn();
+function syncLiftToggle(){
+  if(!liftToggleBtn) return;
+  const on=isLiftActive();
+  liftToggleBtn.textContent=`${on?'✓':'☐'} Lift`;
+  liftToggleBtn.classList.toggle("trail-active",on);
+  liftToggleBtn.classList.toggle("trail-soft-active",!on);
 }
-setMode(mode,true);
+function syncGuidesBtn(){
+  if(!guidesBtn) return;
+  guidesBtn.textContent=showGuides?"Guides":"No Guides";
+  guidesBtn.classList.toggle("trail-active",showGuides);
+  guidesBtn.classList.toggle("trail-soft-active",!showGuides);
+}
+function syncWidthBtn(){
+  if(!widthBtn) return;
+  widthBtn.textContent=`WIDTH ${widthMode+1}/4`;
+  widthBtn.classList.toggle("trail-active",widthMode>0);
+}
+function syncBgBtn(){
+  if(!bgBtn) return;
+  const isWhite=bgMode==="white";
+  bgBtn.textContent=`BG: ${isWhite?"White":"Dark"}`;
+  bgBtn.classList.toggle("trail-active",isWhite);
+  bgBtn.classList.toggle("trail-soft-active",!isWhite);
+}
+function updateSubtext(){
+  if(!subEl) return;
+  let text="";
+  if(mode==="lift") text="Draw a rainbow ribbon. Lift to watch it snake away.";
+  else if(mode==="lcd") text="Draw as much as you want. It only erases when you press Erase.";
+  else if(mode==="stencil") text="Trace and color the stencil. Tap Next for a new one.";
+  else if(mode==="mirror") text="Mirror ↔ makes matching lines on the left and right.";
+  else if(mode==="vmirror") text="Mirror ↕ makes matching lines on the top and bottom.";
+  else if(mode==="quad") text="Quad Mirror reflects both ways for four matching copies.";
+  else if(mode==="custom"){
+    if(!customMirror.a) text="DIY Mirror: tap one spot to start your magic mirror line.";
+    else if(!customMirror.ready) text="DIY Mirror: tap a second spot to finish your mirror line.";
+    else text="DIY Mirror: draw anywhere and it reflects across your own line.";
+  }
+  else if(mode==="pop") text="Pop! Draw and lift — it bursts into confetti sparkles.";
+  if(mode!=="lift"&&isLiftActive()) text+=" Lift is on too, so the trail slithers away when you let go.";
+  subEl.textContent=text;
+}
+function requestClearAll(){
+  if(!hasArt()) return;
+  const verb=(mode==="stencil"||mode==="pop")?"clear":"erase";
+  if(window.confirm(`Really ${verb} everything?`)) doClearAll();
+}
+function undoLast(){
+  activePointers.clear();
+  if(strokes.length){
+    strokes.pop();
+    draw();
+    return;
+  }
+  if(particles.length){
+    particles=[];
+    draw();
+  }
+}
+function snapshot(){
+  if(!canvas) return;
+  draw();
+  const a=document.createElement("a");
+  const d=new Date();
+  const stamp=[
+    d.getFullYear(),
+    String(d.getMonth()+1).padStart(2,"0"),
+    String(d.getDate()).padStart(2,"0"),
+    "_",
+    String(d.getHours()).padStart(2,"0"),
+    String(d.getMinutes()).padStart(2,"0"),
+    String(d.getSeconds()).padStart(2,"0")
+  ].join("");
+  a.download=`trail_painter_${stamp}.png`;
+  a.href=canvas.toDataURL("image/png");
+  a.click();
+}
+function resetCustomMirror(){
+  customMirror.a=null;
+  customMirror.b=null;
+  customMirror.ready=false;
+  customMirror.stage=0;
+  doClearAll();
+  updateSubtext();
+}
+function handleNextAction(){
+  if(mode==="stencil"){
+    stencilIndex=(stencilIndex+1)%stencils.length;
+    doClearAll();
+  }else if(mode==="custom"){
+    resetCustomMirror();
+  }
 }
 function setMode(m,skipClear){
-mode=m;
-for(const b of modeBtns){b.classList.toggle("trail-active",b.dataset.trailMode===m);}
-if(mode==="lift"){
-  eraseBtn.style.display="none";
-  nextBtn.style.display="none";
-  if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
-  if(quickNextBtn) quickNextBtn.style.display="none";
-  if(subEl)subEl.textContent="Draw a rainbow ribbon. Lift to watch it snake away.";
+  mode=m;
+  for(const b of modeBtns){b.classList.toggle("trail-active",b.dataset.trailMode===m);}
+  if(mode==="lift"){
+    eraseBtn.style.display="none";
+    nextBtn.style.display="none";
+    if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
+    if(quickNextBtn) quickNextBtn.style.display="none";
+  }else if(mode==="lcd"){
+    eraseBtn.style.display="inline-flex";
+    eraseBtn.textContent="Erase";
+    if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
+    nextBtn.style.display="none";
+    if(quickNextBtn) quickNextBtn.style.display="none";
+  }else if(mode==="stencil"){
+    eraseBtn.style.display="inline-flex";
+    eraseBtn.textContent="Clear";
+    if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Clear"; }
+    if(quickNextBtn){ quickNextBtn.style.display="inline-flex"; quickNextBtn.textContent="Next"; }
+    nextBtn.style.display="inline-flex";
+    nextBtn.textContent="Next";
+  }else if(mode==="mirror"||mode==="vmirror"||mode==="quad"){
+    eraseBtn.style.display="inline-flex";
+    eraseBtn.textContent="Erase";
+    if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
+    nextBtn.style.display="none";
+    if(quickNextBtn) quickNextBtn.style.display="none";
+  }else if(mode==="custom"){
+    eraseBtn.style.display="inline-flex";
+    eraseBtn.textContent="Erase";
+    if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
+    if(quickNextBtn){ quickNextBtn.style.display="inline-flex"; quickNextBtn.textContent="New Line"; }
+    nextBtn.style.display="inline-flex";
+    nextBtn.textContent="New Line";
+  }else if(mode==="pop"){
+    eraseBtn.style.display="inline-flex";
+    eraseBtn.textContent="Clear";
+    if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Clear"; }
+    nextBtn.style.display="none";
+    if(quickNextBtn) quickNextBtn.style.display="none";
+  }
+  if(!skipClear){
+    strokes=[];
+    particles=[];
+    activePointers.clear();
+  }
+  syncLiftToggle();
+  syncGuidesBtn();
+  syncWidthBtn();
+  syncBgBtn();
+  updateSubtext();
+  draw();
 }
-else if(mode==="lcd"){
-  eraseBtn.style.display="inline-flex";
-  eraseBtn.textContent="Erase";
-  if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
-  nextBtn.style.display="none";
-  if(subEl)subEl.textContent="Draw as much as you want. It only erases when you press Erase.";
+function initDom(){
+  modeBtns=[...document.querySelectorAll("#g-trail .trail-mode")];
+  eraseBtn=document.getElementById("trail-erase-btn");
+  quickEraseBtn=document.getElementById("trail-quick-erase");
+  quickNextBtn=document.getElementById("trail-quick-next");
+  nextBtn=document.getElementById("trail-next-btn");
+  widthBtn=document.getElementById("trail-width-btn");
+  subEl=document.querySelector("#g-trail .trail-sub");
+  hudEl=document.querySelector("#g-trail .trail-hud");
+  menuBtnEl=document.getElementById("trail-menu-btn");
+  liftToggleBtn=document.getElementById("trail-lift-toggle");
+  undoBtn=document.getElementById("trail-undo-btn");
+  snapBtn=document.getElementById("trail-snap-btn");
+  guidesBtn=document.getElementById("trail-guides-btn");
+  bgBtn=document.getElementById("trail-bg-btn");
+  if(menuBtnEl && hudEl){
+    menuBtnEl.addEventListener("click",(e)=>{ e.preventDefault(); e.stopPropagation(); hudEl.classList.toggle("trail-collapsed"); });
+  }
+  for(const b of modeBtns){b.addEventListener("click",()=>setMode(b.dataset.trailMode));}
+  eraseBtn.addEventListener("click",requestClearAll);
+  if(quickEraseBtn) quickEraseBtn.addEventListener("click",requestClearAll);
+  nextBtn.addEventListener("click",handleNextAction);
+  if(quickNextBtn) quickNextBtn.addEventListener("click",handleNextAction);
+  if(widthBtn) widthBtn.addEventListener("click",()=>{ widthMode=(widthMode+1)%4; syncWidthBtn(); draw(); });
+  if(liftToggleBtn) liftToggleBtn.addEventListener("click",()=>{ liftPlus=!liftPlus; syncLiftToggle(); updateSubtext(); draw(); });
+  if(undoBtn) undoBtn.addEventListener("click",undoLast);
+  if(snapBtn) snapBtn.addEventListener("click",snapshot);
+  if(guidesBtn) guidesBtn.addEventListener("click",()=>{ showGuides=!showGuides; syncGuidesBtn(); draw(); });
+  if(bgBtn) bgBtn.addEventListener("click",()=>{ bgMode=(bgMode==="white")?"dark":"white"; syncBgBtn(); draw(); });
+  syncBgBtn();
+  setMode(mode,true);
 }
-else if(mode==="stencil"){
-  eraseBtn.style.display="inline-flex";
-  eraseBtn.textContent="Clear";
-  if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Clear"; }
-  if(quickNextBtn){ quickNextBtn.style.display="inline-flex"; quickNextBtn.textContent="Next"; }
-  nextBtn.style.display="inline-flex";
-  nextBtn.textContent="Next";
-  if(subEl)subEl.textContent="Trace and color the stencil. Tap Next for a new one.";
-}
-else if(mode==="mirror"){
-  eraseBtn.style.display="inline-flex";
-  eraseBtn.textContent="Erase";
-  if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
-  nextBtn.style.display="none";
-  if(subEl)subEl.textContent="Mirror Mode: whatever you draw appears on both sides!";
-}
-else if(mode==="quad"){
-  eraseBtn.style.display="inline-flex";
-  eraseBtn.textContent="Erase";
-  if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Erase"; }
-  nextBtn.style.display="none";
-  if(subEl)subEl.textContent="Quad Mirror: it reflects left/right AND up/down (four copies)!";
-}
-else if(mode==="pop"){
-  eraseBtn.style.display="inline-flex";
-  eraseBtn.textContent="Clear";
-  if(quickEraseBtn){ quickEraseBtn.style.display="inline-flex"; quickEraseBtn.textContent="Clear"; }
-  nextBtn.style.display="none";
-  if(subEl)subEl.textContent="Pop! Draw and lift — it bursts into confetti sparkles.";
-}
-if(mode!=="stencil" && quickNextBtn) quickNextBtn.style.display="none";
-if(!skipClear){strokes=[];particles=[];activePointers.clear();}
-}
-
 function openMenu(){
-if(!canvas){
-canvas=document.getElementById("trail-canvas");
-ctx=canvas.getContext("2d");
-canvas.addEventListener("pointerdown",down,{passive:false});
-canvas.addEventListener("pointermove",move,{passive:false});
-window.addEventListener("pointerup",up,{passive:false});
-window.addEventListener("pointercancel",cancel,{passive:false});
-}
-if(!modeBtns) initDom();
-active=true;
-resize();
-if(!raf) raf=requestAnimationFrame(loop);
+  if(!canvas){
+    canvas=document.getElementById("trail-canvas");
+    ctx=canvas.getContext("2d");
+    canvas.addEventListener("pointerdown",down,{passive:false});
+    canvas.addEventListener("pointermove",move,{passive:false});
+    window.addEventListener("pointerup",up,{passive:false});
+    window.addEventListener("pointercancel",cancel,{passive:false});
+  }
+  if(!modeBtns) initDom();
+  active=true;
+  resize();
+  if(!raf) raf=requestAnimationFrame(loop);
 }
 function resize(){
-if(!canvas) return;
-dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
-const r=canvas.getBoundingClientRect();
-w=Math.max(1,Math.floor(r.width*dpr));
-h=Math.max(1,Math.floor(r.height*dpr));
-canvas.width=w;canvas.height=h;
+  if(!canvas) return;
+  dpr=Math.max(1,Math.min(3,window.devicePixelRatio||1));
+  const r=canvas.getBoundingClientRect();
+  prevW=w||Math.max(1,Math.floor(r.width*dpr));
+  prevH=h||Math.max(1,Math.floor(r.height*dpr));
+  w=Math.max(1,Math.floor(r.width*dpr));
+  h=Math.max(1,Math.floor(r.height*dpr));
+  if(customMirror.a&&customMirror.b&&prevW>0&&prevH>0){
+    customMirror.a.x=(customMirror.a.x/prevW)*w;
+    customMirror.a.y=(customMirror.a.y/prevH)*h;
+    customMirror.b.x=(customMirror.b.x/prevW)*w;
+    customMirror.b.y=(customMirror.b.y/prevH)*h;
+  }
+  canvas.width=w;canvas.height=h;
+  draw();
 }
 function quit(){active=false;if(raf){cancelAnimationFrame(raf);raf=null;}activePointers.clear();}
 function toLocal(e){
-const r=canvas.getBoundingClientRect();
-return {x:(e.clientX-r.left)*dpr,y:(e.clientY-r.top)*dpr};
+  const r=canvas.getBoundingClientRect();
+  return {x:(e.clientX-r.left)*dpr,y:(e.clientY-r.top)*dpr};
 }
 function newStroke(p){
-const s={points:[p],startIndex:0,visible:260,growT:0,state:"drawing",hue:(Math.random()*360)|0,last:p,eraseDelay:0,eraseSpeed:0.11};
-strokes.push(s);
-return s;
+  const s={points:[p],startIndex:0,visible:260,growT:0,state:"drawing",hue:(Math.random()*360)|0,last:p,eraseDelay:0,eraseSpeed:0.11};
+  strokes.push(s);
+  return s;
 }
 function addPoint(s,p){
-const dx=p.x-s.last.x,dy=p.y-s.last.y;
-if(dx*dx+dy*dy<5.5*5.5) return;
-s.points.push(p);
-s.last=p;
-if(s.points.length>7000) s.points.shift();
+  const dx=p.x-s.last.x,dy=p.y-s.last.y;
+  if(dx*dx+dy*dy<5.5*5.5) return;
+  s.points.push(p);
+  s.last=p;
+  if(s.points.length>7000) s.points.shift();
 }
-
 function spawnPop(x,y,hue){
   const count=36;
   for(let i=0;i<count;i++){
@@ -1740,198 +1888,267 @@ function spawnPop(x,y,hue){
     });
   }
 }
-
-function down(e){
-if(!active) return;
-if(hudEl) hudEl.classList.add("trail-collapsed");
-const p=toLocal(e);
-const s=newStroke(p);
-activePointers.set(e.pointerId,s);
-canvas.setPointerCapture?.(e.pointerId);
-e.preventDefault();
-}
-function move(e){
-if(!active) return;
-const s=activePointers.get(e.pointerId);
-if(!s) return;
-addPoint(s,toLocal(e));
-e.preventDefault();
-}
-function up(e){
-if(!active) return;
-const s=activePointers.get(e.pointerId);
-if(!s) return;
-if(mode==="lift"){
-  s.state="erasing";s.eraseDelay=220;s.eraseSpeed=0.085;
-}else if(mode==="pop"){
-  try{ spawnPop(s.last.x,s.last.y,s.hue); }catch(_e){}
-  s.state="erasing";s.eraseDelay=0;s.eraseSpeed=2.8;
-}else{
-  s.state="done";
-}
-activePointers.delete(e.pointerId);
-e.preventDefault?.();
-}
-function cancel(e){
-if(!active) return;
-const s=activePointers.get(e.pointerId);
-if(s){
-  if(mode==="lift"){
-    s.state="erasing";s.eraseDelay=220;s.eraseSpeed=0.085;
-  }else if(mode==="pop"){
+function finishStroke(s){
+  if(mode==="pop"){
     try{ spawnPop(s.last.x,s.last.y,s.hue); }catch(_e){}
-    s.state="erasing";s.eraseDelay=0;s.eraseSpeed=2.8;
+    if(isLiftActive()){
+      s.state="erasing";s.eraseDelay=220;s.eraseSpeed=0.085;
+    }else{
+      s.state="erasing";s.eraseDelay=0;s.eraseSpeed=2.8;
+    }
+  }else if(isLiftActive()){
+    s.state="erasing";s.eraseDelay=220;s.eraseSpeed=0.085;
   }else{
     s.state="done";
   }
-  activePointers.delete(e.pointerId);
 }
-activePointers.clear();
-e.preventDefault?.();
+function handleCustomMirrorTap(p){
+  if(!customMirror.a){
+    customMirror.a={x:p.x,y:p.y};
+    customMirror.stage=1;
+    customMirror.ready=false;
+    updateSubtext();
+    draw();
+    return true;
+  }
+  if(!customMirror.ready){
+    const dx=p.x-customMirror.a.x, dy=p.y-customMirror.a.y;
+    if(dx*dx+dy*dy<36) return true;
+    customMirror.b={x:p.x,y:p.y};
+    customMirror.stage=2;
+    customMirror.ready=true;
+    updateSubtext();
+    draw();
+    return true;
+  }
+  return false;
+}
+function down(e){
+  if(!active) return;
+  const p=toLocal(e);
+  if(mode==="custom"&&!customMirror.ready){
+    handleCustomMirrorTap(p);
+    e.preventDefault();
+    return;
+  }
+  const s=newStroke(p);
+  activePointers.set(e.pointerId,s);
+  canvas.setPointerCapture?.(e.pointerId);
+  e.preventDefault();
+}
+function move(e){
+  if(!active) return;
+  const s=activePointers.get(e.pointerId);
+  if(!s) return;
+  addPoint(s,toLocal(e));
+  e.preventDefault();
+}
+function up(e){
+  if(!active) return;
+  const s=activePointers.get(e.pointerId);
+  if(!s) return;
+  finishStroke(s);
+  activePointers.delete(e.pointerId);
+  e.preventDefault?.();
+}
+function cancel(e){
+  if(!active) return;
+  const s=activePointers.get(e.pointerId);
+  if(s){
+    finishStroke(s);
+    activePointers.delete(e.pointerId);
+  }
+  activePointers.clear();
+  e.preventDefault?.();
 }
 function step(dt){
-for(let i=strokes.length-1;i>=0;i--){
-const s=strokes[i];
-if(s.state==="drawing"){
-if(mode==="lift"){
-s.growT+=dt;
-if(s.growT>=240){s.growT=0;s.visible=Math.min(6200,s.visible+160);}
-}
-}else if(s.state==="erasing"){
-if(s.eraseDelay>0){s.eraseDelay-=dt;continue;}
-s.startIndex+=s.eraseSpeed*dt;
-if(s.startIndex>=s.points.length-1) strokes.splice(i,1);
-}
-}
+  for(let i=strokes.length-1;i>=0;i--){
+    const s=strokes[i];
+    if(s.state==="drawing"){
+      if(isLiftActive()){
+        s.growT+=dt;
+        if(s.growT>=240){s.growT=0;s.visible=Math.min(6200,s.visible+160);}
+      }
+    }else if(s.state==="erasing"){
+      if(s.eraseDelay>0){s.eraseDelay-=dt;continue;}
+      s.startIndex+=s.eraseSpeed*dt;
+      if(s.startIndex>=s.points.length-1) strokes.splice(i,1);
+    }
+  }
 
-for(let i=particles.length-1;i>=0;i--){
-  const p=particles[i];
-  p.life-=dt;
-  if(p.life<=0){ particles.splice(i,1); continue; }
-  p.vx*=Math.pow(0.995, dt/16);
-  p.vy = p.vy*Math.pow(0.992, dt/16) + 0.0015*dt;
-  p.x += p.vx*dt;
-  p.y += p.vy*dt;
-}
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.life-=dt;
+    if(p.life<=0){ particles.splice(i,1); continue; }
+    p.vx*=Math.pow(0.995, dt/16);
+    p.vy = p.vy*Math.pow(0.992, dt/16) + 0.0015*dt;
+    p.x += p.vx*dt;
+    p.y += p.vy*dt;
+  }
 }
 function drawStencil(){
-const st=stencils[stencilIndex];
-if(!st) return;
-const size=Math.min(w,h)*0.66;
-const cx=w*0.5,cy=h*0.58;
-ctx.save();
-ctx.translate(cx,cy);
-ctx.scale(size,size);
-ctx.lineWidth=0.012;
-ctx.strokeStyle="rgba(255,255,255,0.28)";
-ctx.setLineDash([0.035,0.025]);
-ctx.lineCap="round";
-ctx.lineJoin="round";
-st.draw(ctx);
-ctx.restore();
+  const st=stencils[stencilIndex];
+  if(!st) return;
+  const size=Math.min(w,h)*0.66;
+  const cx=w*0.5,cy=h*0.58;
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.scale(size,size);
+  ctx.lineWidth=0.012;
+  ctx.strokeStyle=(bgMode==="white")?"rgba(0,0,0,0.22)":"rgba(255,255,255,0.28)";
+  ctx.setLineDash([0.035,0.025]);
+  ctx.lineCap="round";
+  ctx.lineJoin="round";
+  st.draw(ctx);
+  ctx.restore();
 }
-function draw(){
-if(!canvas) return;
-ctx.clearRect(0,0,w,h);
-
-if(mode==="mirror"||mode==="quad"){
+function drawGuideLine(x1,y1,x2,y2){
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+}
+function drawMirrorGuides(){
+  if(!showGuides) return;
+  if(!(mode==="mirror"||mode==="vmirror"||mode==="quad"||mode==="custom")) return;
   ctx.save();
   ctx.setLineDash([6*dpr,6*dpr]);
   ctx.lineWidth=1*dpr;
-  ctx.strokeStyle="rgba(255,255,255,0.18)";
+  ctx.strokeStyle=(bgMode==="white")?"rgba(0,0,0,0.18)":"rgba(255,255,255,0.18)";
+  if(mode==="mirror"||mode==="quad") drawGuideLine(w/2,0,w/2,h);
+  if(mode==="vmirror"||mode==="quad") drawGuideLine(0,h/2,w,h/2);
+  if(mode==="custom"){
+    if(customMirror.a){
+      if(customMirror.ready&&customMirror.b){
+        const dx=customMirror.b.x-customMirror.a.x;
+        const dy=customMirror.b.y-customMirror.a.y;
+        const len=Math.hypot(dx,dy)||1;
+        const ux=dx/len, uy=dy/len;
+        const reach=Math.max(w,h)*1.5;
+        drawGuideLine(customMirror.a.x-ux*reach,customMirror.a.y-uy*reach,customMirror.a.x+ux*reach,customMirror.a.y+uy*reach);
+      }
+      ctx.setLineDash([]);
+      ctx.fillStyle=(bgMode==="white")?"rgba(0,0,0,0.72)":"rgba(255,255,255,0.80)";
+      ctx.beginPath();
+      ctx.arc(customMirror.a.x,customMirror.a.y,4*dpr,0,Math.PI*2);
+      ctx.fill();
+      if(customMirror.b){
+        ctx.beginPath();
+        ctx.arc(customMirror.b.x,customMirror.b.y,4*dpr,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+  ctx.restore();
+}
+function drawLineSegment(a,b){
   ctx.beginPath();
-  ctx.moveTo(w/2,0);
-  ctx.lineTo(w/2,h);
+  ctx.moveTo(a.x,a.y);
+  ctx.lineTo(b.x,b.y);
+  ctx.stroke();
+}
+function drawSegmentCopies(p0,p1){
+  drawLineSegment(p0,p1);
+  if(mode==="mirror"||mode==="quad"){
+    drawLineSegment({x:w-p0.x,y:p0.y},{x:w-p1.x,y:p1.y});
+  }
+  if(mode==="vmirror"||mode==="quad"){
+    drawLineSegment({x:p0.x,y:h-p0.y},{x:p1.x,y:h-p1.y});
+  }
   if(mode==="quad"){
-    ctx.moveTo(0,h/2);
-    ctx.lineTo(w,h/2);
+    drawLineSegment({x:w-p0.x,y:h-p0.y},{x:w-p1.x,y:h-p1.y});
   }
-  ctx.stroke();
-  ctx.restore();
+  if(mode==="custom"&&customMirror.ready){
+    drawLineSegment(reflectAcrossCustom(p0),reflectAcrossCustom(p1));
+  }
 }
-if(mode==="stencil") drawStencil();
-
-for(const s of strokes){
-const pts=s.points;
-if(pts.length<2) continue;
-let si=Math.floor(s.startIndex);
-let end=pts.length;
-if(mode==="lift"){
-const tailStart=Math.max(s.startIndex,end-Math.min(s.visible,end));
-si=Math.floor(tailStart);
-}
-if(end-si<2) continue;
-ctx.lineCap="round";
-ctx.lineJoin="round";
-for(let i=si+1;i<end;i++){
-const p0=pts[i-1],p1=pts[i];
-const t=(i-si)/Math.max(1,(end-si));
-const hue=(s.hue + t*240 + performance.now()*0.03)%360;
-const lw=(mode==="lift")?(2.5 + 5.8*(1-t)):(4.5);
-ctx.strokeStyle=`hsla(${hue},100%,65%,0.95)`;
-ctx.lineWidth=lw*widthFactors[widthMode];
-
-ctx.beginPath();
-ctx.moveTo(p0.x,p0.y);
-ctx.lineTo(p1.x,p1.y);
-ctx.stroke();
-
-if(mode==="mirror"||mode==="quad"){
-  const mx0=w-p0.x, mx1=w-p1.x;
+function drawParticleCopies(p){
   ctx.beginPath();
-  ctx.moveTo(mx0,p0.y);
-  ctx.lineTo(mx1,p1.y);
-  ctx.stroke();
-}
-if(mode==="quad"){
-  const my0=h-p0.y, my1=h-p1.y;
-  ctx.beginPath();
-  ctx.moveTo(p0.x,my0);
-  ctx.lineTo(p1.x,my1);
-  ctx.stroke();
-  const mx0=w-p0.x, mx1=w-p1.x;
-  ctx.beginPath();
-  ctx.moveTo(mx0,my0);
-  ctx.lineTo(mx1,my1);
-  ctx.stroke();
-}
-}
-}
-
-if(particles.length){
-  ctx.save();
-  ctx.globalCompositeOperation="lighter";
-  for(const p of particles){
-    const a=Math.max(0, Math.min(1, p.life/560));
-    ctx.fillStyle=`hsla(${p.hue},100%,70%,${0.9*a})`;
+  ctx.arc(p.x,p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
+  ctx.fill();
+  if(mode==="mirror"||mode==="quad"){
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
+    ctx.arc(w-p.x,p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
     ctx.fill();
-    if(mode==="mirror"||mode==="quad"){
-      ctx.beginPath();
-      ctx.arc(w-p.x,p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
-      ctx.fill();
+  }
+  if(mode==="vmirror"||mode==="quad"){
+    ctx.beginPath();
+    ctx.arc(p.x,h-p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
+    ctx.fill();
+  }
+  if(mode==="quad"){
+    ctx.beginPath();
+    ctx.arc(w-p.x,h-p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
+    ctx.fill();
+  }
+  if(mode==="custom"&&customMirror.ready){
+    const rp=reflectAcrossCustom(p);
+    ctx.beginPath();
+    ctx.arc(rp.x,rp.y,p.r*widthFactors[widthMode],0,Math.PI*2);
+    ctx.fill();
+  }
+}
+function drawBackground(){
+  if(bgMode==="white"){
+    ctx.fillStyle="#ffffff";
+    ctx.fillRect(0,0,w,h);
+    return;
+  }
+  const g=ctx.createRadialGradient(w*0.60,h*0.30,Math.max(1,Math.min(w,h)*0.05),w*0.60,h*0.30,Math.max(w,h)*0.95);
+  g.addColorStop(0,"#1c1230");
+  g.addColorStop(1,"#050509");
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,w,h);
+}
+function draw(){
+  if(!canvas) return;
+  ctx.clearRect(0,0,w,h);
+  drawBackground();
+  drawMirrorGuides();
+  if(mode==="stencil") drawStencil();
+
+  for(const s of strokes){
+    const pts=s.points;
+    if(pts.length<2) continue;
+    let si=Math.floor(s.startIndex);
+    let end=pts.length;
+    if(isLiftActive()){
+      const tailStart=Math.max(s.startIndex,end-Math.min(s.visible,end));
+      si=Math.floor(tailStart);
     }
-    if(mode==="quad"){
-      ctx.beginPath();
-      ctx.arc(p.x,h-p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(w-p.x,h-p.y,p.r*widthFactors[widthMode],0,Math.PI*2);
-      ctx.fill();
+    if(end-si<2) continue;
+    ctx.lineCap="round";
+    ctx.lineJoin="round";
+    for(let i=si+1;i<end;i++){
+      const p0=pts[i-1],p1=pts[i];
+      const t=(i-si)/Math.max(1,(end-si));
+      const hue=(s.hue + t*240 + performance.now()*0.03)%360;
+      const lw=(isLiftActive())?(2.5 + 5.8*(1-t)):(4.5);
+      ctx.strokeStyle=`hsla(${hue},100%,65%,0.95)`;
+      ctx.lineWidth=lw*widthFactors[widthMode];
+      drawSegmentCopies(p0,p1);
     }
   }
-  ctx.restore();
-}
+
+  if(particles.length){
+    ctx.save();
+    ctx.globalCompositeOperation="lighter";
+    for(const p of particles){
+      const a=Math.max(0, Math.min(1, p.life/560));
+      ctx.fillStyle=`hsla(${p.hue},100%,70%,${0.9*a})`;
+      drawParticleCopies(p);
+    }
+    ctx.restore();
+  }
 }
 function loop(ts){
-if(!active) return;
-if(!loop._t) loop._t=ts;
-const dt=Math.min(40,ts-loop._t);
-loop._t=ts;
-step(dt);
-draw();
-raf=requestAnimationFrame(loop);
+  if(!active) return;
+  if(!loop._t) loop._t=ts;
+  const dt=Math.min(40,ts-loop._t);
+  loop._t=ts;
+  step(dt);
+  draw();
+  raf=requestAnimationFrame(loop);
 }
 return{openMenu,resize,quit};
 })();;
