@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcade Index Editor</title>
+  <style>
+    :root{
+      --bg1:#000;
+      --bg2:#161616;
+      --panel:rgba(255,255,255,0.06);
+      --line:rgba(255,255,255,0.14);
+      --soft:rgba(255,255,255,0.08);
+      --text:#fff;
+      --muted:rgba(255,255,255,0.75);
+      --gold:#ffd700;
+      --good:#74ffb0;
+      --bad:#ff7a7a;
+      --cyan:#65e6ff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+      background:radial-gradient(circle at 20% 10%, #212121 0%, #000 72%);
+      color:var(--text);
+      overflow:hidden;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .wrap{height:100%;max-width:1180px;margin:0 auto;padding:12px 10px 10px;display:flex;flex-direction:column;gap:10px}
+    .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .brand{display:flex;flex-direction:column;gap:2px;min-width:230px}
+    .title{margin:0;font-size:clamp(20px,3.2vw,34px);font-weight:1000;letter-spacing:2px;color:var(--gold);text-shadow:0 0 14px rgba(255,215,0,.2)}
+    .subtitle{font-size:12px;color:var(--muted)}
+    .tabs{display:flex;gap:8px;align-items:center}
+    .tabbtn,.btn,select,.urlinput,.input,.textarea{
+      font:inherit;
+    }
+    .tabbtn,.btn{
+      appearance:none;border:2px solid var(--line);background:var(--soft);color:#fff;border-radius:14px;padding:10px 12px;font-weight:900;cursor:pointer
+    }
+    .tabbtn[aria-selected="true"]{border-color:rgba(255,215,0,.45);background:rgba(255,215,0,.1)}
+    .btn.primary{border-color:rgba(255,215,0,.45);background:rgba(255,215,0,.12)}
+    .btn.good{border-color:rgba(80,255,160,.35);background:rgba(80,255,160,.1)}
+    .btn.danger{border-color:rgba(255,122,122,.35);background:rgba(255,122,122,.1)}
+    .btn.ghost{background:rgba(0,0,0,.22)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    input[type=file]{display:none}
+    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;flex:1 1 auto}
+    .pill{display:inline-flex;align-items:center;gap:8px;max-width:58vw;padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.25);font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .urlbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .urlinput,.input,.textarea,select{
+      width:100%;
+      border:2px solid var(--line);
+      background:rgba(0,0,0,.25);
+      color:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      outline:none;
+    }
+    .urlinput{width:min(320px,62vw)}
+    .textarea{min-height:116px;resize:vertical}
+    .panel{flex:1 1 auto;min-height:0;display:flex;border-radius:18px;border:2px solid var(--line);background:var(--panel);box-shadow:0 10px 24px rgba(0,0,0,.35);overflow:hidden}
+    .pane-left{width:400px;max-width:46%;min-width:300px;border-right:2px solid rgba(255,255,255,.1);display:flex;flex-direction:column;min-height:0}
+    .pane-right{flex:1 1 auto;display:flex;flex-direction:column;min-width:0;min-height:0}
+    .pane-head{padding:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(0,0,0,.2);border-bottom:2px solid rgba(255,255,255,.1)}
+    .h{font-size:13px;font-weight:1000;letter-spacing:.4px}
+    .mini{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .mini .btn{padding:8px 10px;border-radius:12px;font-size:12px}
+    .list{flex:1 1 auto;min-height:0;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+    .item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:16px;border:2px solid var(--line);background:rgba(255,255,255,.05);cursor:pointer}
+    .item[aria-selected="true"]{border-color:rgba(255,215,0,.45);background:rgba(255,215,0,.1)}
+    .item.loaded{border-color:rgba(80,255,160,.28);background:rgba(80,255,160,.07)}
+    .item.missing{border-color:rgba(255,122,122,.3);background:rgba(255,122,122,.08)}
+    .item.extra{border-color:rgba(255,122,122,.3);background:rgba(255,122,122,.08)}
+    .it-emoji{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(0,0,0,.24);font-size:24px;flex:0 0 auto}
+    .it-mid{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:4px}
+    .it-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .it-href{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .it-controls{display:flex;gap:6px;align-items:center;flex:0 0 auto}
+    .iconbtn{appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25);color:#fff;width:32px;height:32px;border-radius:12px;font-weight:1000;cursor:pointer}
+    .iconbtn:disabled{opacity:.4;cursor:not-allowed}
+    .statusdot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:1000;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.25)}
+    .statusdot.ok{color:#001d10;background:rgba(116,255,176,.9);border-color:rgba(116,255,176,.9)}
+    .statusdot.bad{color:#2a0000;background:rgba(255,122,122,.9);border-color:rgba(255,122,122,.9)}
+    .subsection{display:flex;flex-direction:column;gap:8px;margin-top:6px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.12)}
+    .subhead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 4px}
+    .miniPill{display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.14);font-size:11px;font-weight:900}
+    .editor{padding:12px;display:grid;grid-template-columns:1fr;gap:10px;overflow:auto}
+    .fieldrow{display:grid;grid-template-columns:140px 1fr;gap:10px;align-items:center}
+    .label{font-weight:900;color:rgba(255,255,255,.9)}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .hint{color:var(--muted);font-size:12px;line-height:1.4}
+    .preview{border-top:2px solid rgba(255,255,255,.1);padding:12px;overflow:auto;min-height:0}
+    .arcade-wrap{display:flex;flex-direction:column;gap:10px}
+    .arcade-title{font-size:clamp(22px,4vw,38px);font-weight:1000;color:var(--gold);letter-spacing:1px}
+    .arcade-subtitle{color:var(--muted);line-height:1.5}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+    .card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;padding:14px;border-radius:20px;text-decoration:none;color:#fff;border:2px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+    .emoji{font-size:40px;line-height:1}
+    .name{font-weight:900;text-align:center}
+    .codepane{display:none;flex-direction:column}
+    .codehead{padding:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:2px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);flex-wrap:wrap}
+    .codebox{flex:1 1 auto;min-height:0;overflow:auto;padding:0}
+    pre{margin:0;padding:14px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(14px);opacity:0;pointer-events:none;background:rgba(0,0,0,.86);color:#fff;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.16);transition:all .18s ease;z-index:30;font-weight:900}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .modalOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:25}
+    .modalOverlay.show{display:flex}
+    .modal{width:min(720px,95vw);background:#111;border:2px solid var(--line);border-radius:22px;box-shadow:0 20px 40px rgba(0,0,0,.45);overflow:hidden}
+    .modalHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)}
+    .modalTitle{font-weight:1000;letter-spacing:.4px;color:var(--gold)}
+    .modalBody{padding:14px;display:flex;flex-direction:column;gap:12px}
+    @media (max-width: 900px){
+      body{overflow:auto}
+      .wrap{height:auto;min-height:100%}
+      .panel{flex-direction:column;height:auto;min-height:0}
+      .pane-left{max-width:none;width:auto;min-width:0;border-right:none;border-bottom:2px solid rgba(255,255,255,.1)}
+      .row2{grid-template-columns:1fr}
+      .fieldrow{grid-template-columns:1fr}
+      .urlinput{width:min(100%,88vw)}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="title">Arcade Index Editor</div>
+        <div class="subtitle">Load an index, sync game files against it, then export the updated index.</div>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Tabs">
+        <button class="tabbtn" id="tabBuilder" role="tab" aria-selected="true">Builder</button>
+        <button class="tabbtn" id="tabCode" role="tab" aria-selected="false">HTML Code</button>
+      </div>
+      <div class="actions">
+        <label class="btn primary" for="fileInput">Load index.html</label>
+        <input id="fileInput" type="file" accept=".html,text/html" />
+        <div class="urlbox">
+          <input id="indexUrl" class="urlinput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="…or paste an index URL" />
+          <button class="btn" id="btnLoadIndexUrl">Load URL</button>
+        </div>
+        <label class="btn" for="gameFilesInput" id="lblGameFiles" style="display:none;">Load game files</label>
+        <input id="gameFilesInput" type="file" accept=".html,text/html" multiple />
+        <div class="urlbox" id="gameUrlBox" style="display:none;">
+          <input id="gameUrl" class="urlinput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="…or paste a game HTML URL" />
+          <button class="btn" id="btnAddGameUrl">Add game URL</button>
+        </div>
+        <div class="pill" id="filePill">No index loaded</div>
+        <div class="pill" id="syncPill" style="display:none;">0 / 0 game files loaded</div>
+        <button class="btn good" id="btnDownload" disabled>Download updated index</button>
+      </div>
+    </div>
+
+    <div class="panel" id="builderPanel">
+      <div class="pane-left">
+        <div class="pane-head">
+          <div class="h">Games</div>
+          <div class="mini"><button class="btn" id="btnAdd">Add</button></div>
+        </div>
+        <div class="list" id="gameList"><div class="hint">Load an index to begin.</div></div>
+      </div>
+      <div class="pane-right">
+        <div class="pane-head">
+          <div class="h">Edit selected</div>
+          <div class="mini">
+            <button class="btn danger" id="btnDelete" disabled>Delete</button>
+          </div>
+        </div>
+        <div class="editor" id="editor">
+          <div class="hint" id="editorHint">Load an index, then click a game on the left to edit it.</div>
+          <div class="fieldrow"><div class="label">Menu title</div><input class="input" id="inTitle" placeholder="Arcade! Hooray!" disabled /></div>
+          <div class="fieldrow"><div class="label">Subtitle HTML</div><textarea class="textarea" id="inSubtitle" disabled></textarea></div>
+          <div class="fieldrow"><div class="label">Game name</div><input class="input" id="inName" disabled /></div>
+          <div class="fieldrow"><div class="label">File (href)</div><input class="input" id="inHref" disabled /></div>
+          <div class="row2">
+            <div class="fieldrow"><div class="label">Emoji / text</div><input class="input" id="inEmoji" disabled /></div>
+            <div class="fieldrow"><div class="label">Emoji color</div><input class="input" id="inEmojiColor" disabled /></div>
+          </div>
+          <div class="hint">Files shown in red are in the index but not loaded. Files shown in the “Loaded but not in index” section are extras you loaded that are not currently referenced by the index.</div>
+        </div>
+        <div class="preview" id="preview">
+          <div class="arcade-wrap">
+            <div class="arcade-title" id="prevTitle">Arcade! Hooray!</div>
+            <div class="arcade-subtitle" id="prevSubtitle">Pick a game.</div>
+            <div class="grid" id="prevGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel codepane" id="codePanel" aria-hidden="true">
+      <div class="codehead">
+        <div class="pill" id="codePill">Generated HTML</div>
+        <button class="btn" id="btnCopy">Copy HTML</button>
+      </div>
+      <div class="codebox"><pre id="codePre"></pre></div>
+    </div>
+  </div>
+
+  <div class="modalOverlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modalHead">
+        <div class="modalTitle">Load constituent game files?</div>
+        <button class="btn ghost" id="btnModalClose">Close</button>
+      </div>
+      <div class="modalBody">
+        <div class="hint">Your index is loaded. Next, load the individual game HTML files so this page can mark what is missing and what is extra.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <label class="btn primary" for="gameFilesInput">Choose game HTML files</label>
+          <input id="modalGameFilesEcho" type="hidden" />
+          <input id="modalGameUrlEcho" type="hidden" />
+          <input id="modalGameUrl" class="urlinput" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="…or paste a game HTML URL" />
+          <button class="btn" id="btnModalAddGameUrl">Add game URL</button>
+          <button class="btn" id="btnModalSkip">Skip for now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = (s, root=document)=>root.querySelector(s);
+    const $$ = (s, root=document)=>Array.from(root.querySelectorAll(s));
+
+    const els = {
+      tabBuilder: $("#tabBuilder"),
+      tabCode: $("#tabCode"),
+      builderPanel: $("#builderPanel"),
+      codePanel: $("#codePanel"),
+      fileInput: $("#fileInput"),
+      indexUrl: $("#indexUrl"),
+      btnLoadIndexUrl: $("#btnLoadIndexUrl"),
+      gameFilesInput: $("#gameFilesInput"),
+      lblGameFiles: $("#lblGameFiles"),
+      gameUrlBox: $("#gameUrlBox"),
+      gameUrl: $("#gameUrl"),
+      btnAddGameUrl: $("#btnAddGameUrl"),
+      filePill: $("#filePill"),
+      syncPill: $("#syncPill"),
+      btnDownload: $("#btnDownload"),
+      gameList: $("#gameList"),
+      btnAdd: $("#btnAdd"),
+      btnDelete: $("#btnDelete"),
+      inTitle: $("#inTitle"),
+      inSubtitle: $("#inSubtitle"),
+      inName: $("#inName"),
+      inHref: $("#inHref"),
+      inEmoji: $("#inEmoji"),
+      inEmojiColor: $("#inEmojiColor"),
+      editorHint: $("#editorHint"),
+      prevTitle: $("#prevTitle"),
+      prevSubtitle: $("#prevSubtitle"),
+      prevGrid: $("#prevGrid"),
+      codePill: $("#codePill"),
+      codePre: $("#codePre"),
+      btnCopy: $("#btnCopy"),
+      toast: $("#toast"),
+      modalOverlay: $("#modalOverlay"),
+      btnModalClose: $("#btnModalClose"),
+      btnModalSkip: $("#btnModalSkip"),
+      modalGameUrl: $("#modalGameUrl"),
+      btnModalAddGameUrl: $("#btnModalAddGameUrl")
+    };
+
+    const state = {
+      loadedName: "",
+      selected: -1,
+      games: [],
+      gameFiles: new Map(),
+      original: {
+        docTitle: "Arcade! Hooray! — Menu",
+        titleText: "Arcade! Hooray!",
+        subtitleHTML: 'Pick a game.',
+        styles: "",
+        metas: ['<meta charset="UTF-8" />','<meta name="viewport" content="width=device-width, initial-scale=1.0" />']
+      }
+    };
+
+    function toast(msg){
+      els.toast.textContent = msg;
+      els.toast.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(()=>els.toast.classList.remove("show"), 1400);
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    function normalizeHex(s){
+      s = String(s ?? "").trim();
+      if(!s) return "";
+      if(/^#[0-9a-fA-F]{3}$/.test(s) || /^#[0-9a-fA-F]{6}$/.test(s)) return s;
+      if(/^[0-9a-fA-F]{3}$/.test(s) || /^[0-9a-fA-F]{6}$/.test(s)) return "#" + s;
+      return s;
+    }
+
+    function normName(name){
+      return String(name || "").split(/[\\/]/).pop().toLowerCase();
+    }
+
+    function isLikelyLocalHref(href){
+      const h = String(href || "").trim();
+      if(!h) return false;
+      if(/^https?:\/\//i.test(h)) return false;
+      if(/^data:/i.test(h)) return false;
+      if(h.startsWith("#")) return false;
+      return true;
+    }
+
+    function setEditorEnabled(on){
+      for(const el of [els.inTitle, els.inSubtitle, els.inName, els.inHref, els.inEmoji, els.inEmojiColor]) el.disabled = !on;
+      els.btnDelete.disabled = !on || state.selected < 0;
+    }
+
+    function showModal(on){
+      els.modalOverlay.classList.toggle("show", !!on);
+      els.modalOverlay.setAttribute("aria-hidden", on ? "false" : "true");
+    }
+
+    function selectTab(which){
+      const isBuilder = which === "builder";
+      els.tabBuilder.setAttribute("aria-selected", isBuilder ? "true" : "false");
+      els.tabCode.setAttribute("aria-selected", isBuilder ? "false" : "true");
+      els.builderPanel.style.display = isBuilder ? "flex" : "none";
+      els.codePanel.style.display = isBuilder ? "none" : "flex";
+      els.codePanel.setAttribute("aria-hidden", isBuilder ? "true" : "false");
+    }
+
+    function canonicalizeUrlInput(urlStr){
+      let s = String(urlStr || "").trim();
+      if(!s) return "";
+      s = s.replace(/^view-source:/i, "").trim();
+      if(!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) s = "https://" + s;
+      return s;
+    }
+
+    function rewriteCommonSourceUrl(urlStr){
+      const url = canonicalizeUrlInput(urlStr);
+      try{
+        const u = new URL(url);
+        if(u.hostname === "github.com"){
+          const parts = u.pathname.split("/").filter(Boolean);
+          if(parts.length >= 5 && parts[2] === "blob"){
+            return `https://raw.githubusercontent.com/${parts[0]}/${parts[1]}/${parts[3]}/${parts.slice(4).join("/")}`;
+          }
+        }
+        return url;
+      }catch{
+        return url;
+      }
+    }
+
+    function nameFromUrl(u){
+      try{
+        const url = new URL(u, location.href);
+        const base = decodeURIComponent((url.pathname || "").split("/").filter(Boolean).pop() || "file.html");
+        return /\.html?$/i.test(base) ? base : (base + ".html");
+      }catch{
+        return "file.html";
+      }
+    }
+
+    function uniqueName(base, existing){
+      if(!existing.has(base)) return base;
+      const m = /^(.*?)(\.[^.]+)?$/.exec(base) || ["", base, ""];
+      let i = 2;
+      while(existing.has(`${m[1]}_${i}${m[2] || ""}`)) i++;
+      return `${m[1]}_${i}${m[2] || ""}`;
+    }
+
+    async function fetchUrlDirect(url){
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), 20000);
+      try{
+        const res = await fetch(url, { mode:"cors", credentials:"omit", cache:"no-store", signal:ctrl.signal });
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.text();
+      }finally{
+        clearTimeout(t);
+      }
+    }
+
+    async function fetchUrlViaProxy(url){
+      return await fetchUrlDirect("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
+    }
+
+    async function fetchTextFromUrl(urlStr){
+      const url = canonicalizeUrlInput(urlStr);
+      if(!url) throw new Error("No URL provided");
+      const rewritten = rewriteCommonSourceUrl(url);
+      const attempts = [
+        ()=>fetchUrlDirect(url),
+        ...(rewritten !== url ? [()=>fetchUrlDirect(rewritten)] : []),
+        ()=>fetchUrlViaProxy(url),
+        ...(rewritten !== url ? [()=>fetchUrlViaProxy(rewritten)] : [])
+      ];
+      let lastErr = null;
+      for(const fn of attempts){
+        try{ return await fn(); }
+        catch(err){ lastErr = err; }
+      }
+      throw lastErr || new Error("Couldn't load URL");
+    }
+
+    function prettyGameNameFromFile(name){
+      const base = String(name || "").replace(/\.[^.]+$/, "");
+      const spaced = base.replace(/[_-]+/g, " ").replace(/([a-z\d])([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
+      if(!spaced) return "New Game";
+      return spaced.replace(/\b[a-z]/g, c=>c.toUpperCase());
+    }
+
+    function defaultGame(){
+      return { href:"newgame.html", name:"New Game", emojiText:"🎮", emojiColor:"#65e6ff" };
+    }
+
+    function updateSyncPill(){
+      const hrefs = state.games.map(g=>g.href).filter(isLikelyLocalHref).map(normName);
+      const unique = Array.from(new Set(hrefs));
+      const loaded = unique.filter(n=>state.gameFiles.has(n)).length;
+      const hasIndex = !!state.loadedName;
+      els.syncPill.style.display = hasIndex ? "inline-flex" : "none";
+      els.lblGameFiles.style.display = hasIndex ? "inline-flex" : "inline-flex";
+      els.gameUrlBox.style.display = hasIndex ? "flex" : "flex";
+      els.syncPill.textContent = `${loaded} / ${unique.length} game files loaded`;
+      if(unique.length && loaded === unique.length){
+        els.syncPill.style.borderColor = "rgba(80,255,160,.35)";
+        els.syncPill.style.background = "rgba(80,255,160,.1)";
+      }else if(unique.length){
+        els.syncPill.style.borderColor = "rgba(255,122,122,.35)";
+        els.syncPill.style.background = "rgba(255,122,122,.1)";
+      }else{
+        els.syncPill.style.borderColor = "rgba(255,255,255,.18)";
+        els.syncPill.style.background = "rgba(0,0,0,.25)";
+      }
+    }
+
+    function readIndexHtml(text){
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, "text/html");
+      state.original.docTitle = (doc.querySelector("title")?.textContent || "Arcade! Hooray! — Menu").trim();
+      state.original.titleText = (doc.querySelector(".title")?.textContent || "Arcade! Hooray!").trim();
+      const subtitleEl = doc.querySelector(".subtitle");
+      state.original.subtitleHTML = subtitleEl ? (subtitleEl.innerHTML || "").trim() : "Pick a game.";
+      state.original.styles = $$("style", doc).map(s=>s.textContent || "").join("\n\n");
+      const metas = $$("head meta", doc).map(m=>m.outerHTML.trim()).filter(Boolean);
+      if(metas.length) state.original.metas = metas;
+      const cards = $$(".grid a.card", doc);
+      state.games = cards.map(a=>{
+        const emojiEl = a.querySelector(".emoji");
+        const nameEl = a.querySelector(".name");
+        const style = emojiEl?.getAttribute("style") || "";
+        const m = style.match(/color\s*:\s*([^;]+)/i);
+        return {
+          href: (a.getAttribute("href") || "").trim(),
+          name: (nameEl?.textContent || "").trim(),
+          emojiText: (emojiEl?.textContent || "").trim(),
+          emojiColor: m ? (m[1] || "").trim() : ""
+        };
+      });
+      state.selected = state.games.length ? 0 : -1;
+      els.inTitle.value = state.original.titleText;
+      els.inSubtitle.value = state.original.subtitleHTML;
+      renderAll();
+      els.btnDownload.disabled = state.games.length === 0;
+      setEditorEnabled(state.games.length > 0);
+      updateSyncPill();
+      showModal(true);
+    }
+
+    function addLoadedFileToIndex(fileRec){
+      if(!fileRec || !fileRec.name) return;
+      const key = normName(fileRec.name);
+      const existingIdx = state.games.findIndex(g=>normName(g.href) === key);
+      if(existingIdx >= 0){
+        state.selected = existingIdx;
+        renderAll();
+        toast("Already in index");
+        return;
+      }
+      const game = defaultGame();
+      game.href = fileRec.name;
+      game.name = prettyGameNameFromFile(fileRec.name);
+      state.games.push(game);
+      state.selected = state.games.length - 1;
+      els.btnDownload.disabled = false;
+      renderAll();
+    }
+
+    function renderList(){
+      els.gameList.innerHTML = "";
+      if(!state.loadedName){
+        els.gameList.innerHTML = '<div class="hint">Load an index to begin.</div>';
+        return;
+      }
+      state.games.forEach((g, idx)=>{
+        const key = isLikelyLocalHref(g.href) ? normName(g.href) : "";
+        const loaded = key && state.gameFiles.has(key);
+        const missing = key && !state.gameFiles.has(key);
+        const row = document.createElement("div");
+        row.className = "item" + (loaded ? " loaded" : "") + (missing ? " missing" : "");
+        row.setAttribute("aria-selected", idx === state.selected ? "true" : "false");
+        row.addEventListener("click", ()=>{ state.selected = idx; renderEditor(); renderList(); });
+        const em = document.createElement("div"); em.className = "it-emoji"; em.textContent = g.emojiText || "🎮"; if(g.emojiColor) em.style.color = g.emojiColor;
+        const mid = document.createElement("div"); mid.className = "it-mid";
+        const nm = document.createElement("div"); nm.className = "it-name"; nm.textContent = g.name || "(untitled)";
+        const hr = document.createElement("div"); hr.className = "it-href"; hr.textContent = g.href || "";
+        mid.append(nm, hr);
+        const ctr = document.createElement("div"); ctr.className = "it-controls";
+        const dot = document.createElement("div"); dot.className = "statusdot" + (loaded ? " ok" : (missing ? " bad" : "")); dot.textContent = loaded ? "✓" : (missing ? "!" : "•");
+        const up = document.createElement("button"); up.className = "iconbtn"; up.textContent = "↑"; up.disabled = idx === 0; up.addEventListener("click", e=>{ e.stopPropagation(); move(idx, idx - 1); });
+        const dn = document.createElement("button"); dn.className = "iconbtn"; dn.textContent = "↓"; dn.disabled = idx === state.games.length - 1; dn.addEventListener("click", e=>{ e.stopPropagation(); move(idx, idx + 1); });
+        ctr.append(dot, up, dn);
+        row.append(em, mid, ctr);
+        els.gameList.appendChild(row);
+      });
+
+      const indexHrefs = new Set(state.games.map(g=>g.href).filter(isLikelyLocalHref).map(normName));
+      const extras = Array.from(state.gameFiles.values()).filter(f=>!indexHrefs.has(normName(f.name)));
+      const sec = document.createElement("div");
+      sec.className = "subsection";
+      const head = document.createElement("div");
+      head.className = "subhead";
+      head.innerHTML = `<span>Loaded but not in index</span><span class="miniPill">${extras.length}</span>`;
+      sec.appendChild(head);
+      if(!extras.length){
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.textContent = "No extra loaded files.";
+        sec.appendChild(hint);
+      }else{
+        extras.forEach(f=>{
+          const row = document.createElement("div");
+          row.className = "item extra";
+          const em = document.createElement("div"); em.className = "it-emoji"; em.textContent = "📄";
+          const mid = document.createElement("div"); mid.className = "it-mid";
+          const nm = document.createElement("div"); nm.className = "it-name"; nm.textContent = f.name;
+          const hr = document.createElement("div"); hr.className = "it-href"; hr.textContent = "Loaded file not referenced by the index";
+          mid.append(nm, hr);
+          const ctr = document.createElement("div"); ctr.className = "it-controls";
+          const addBtn = document.createElement("button"); addBtn.className = "iconbtn"; addBtn.textContent = "+"; addBtn.title = "Add this file to the index";
+          addBtn.addEventListener("click", e=>{ e.stopPropagation(); addLoadedFileToIndex(f); toast(`Added ${f.name} to index`); });
+          const dot = document.createElement("div"); dot.className = "statusdot bad"; dot.textContent = "✕";
+          ctr.append(addBtn, dot);
+          row.append(em, mid, ctr);
+          sec.appendChild(row);
+        });
+      }
+      els.gameList.appendChild(sec);
+    }
+
+    function move(from, to){
+      if(to < 0 || to >= state.games.length || from === to) return;
+      const it = state.games.splice(from, 1)[0];
+      state.games.splice(to, 0, it);
+      if(state.selected === from) state.selected = to;
+      else if(state.selected > from && state.selected <= to) state.selected--;
+      else if(state.selected < from && state.selected >= to) state.selected++;
+      renderAll();
+    }
+
+    function renderEditor(){
+      const has = state.selected >= 0 && state.selected < state.games.length;
+      els.editorHint.style.display = has ? "none" : "block";
+      if(!has){
+        els.inName.value = ""; els.inHref.value = ""; els.inEmoji.value = ""; els.inEmojiColor.value = "";
+        els.btnDelete.disabled = true;
+        return;
+      }
+      const g = state.games[state.selected];
+      els.inName.value = g.name || "";
+      els.inHref.value = g.href || "";
+      els.inEmoji.value = g.emojiText || "";
+      els.inEmojiColor.value = g.emojiColor || "";
+      els.btnDelete.disabled = false;
+    }
+
+    function renderPreview(){
+      els.prevTitle.textContent = state.original.titleText || "Arcade! Hooray!";
+      els.prevSubtitle.innerHTML = state.original.subtitleHTML || "";
+      els.prevGrid.innerHTML = "";
+      state.games.forEach(g=>{
+        const a = document.createElement("a");
+        a.className = "card";
+        a.href = g.href || "#";
+        const em = document.createElement("div"); em.className = "emoji"; em.textContent = g.emojiText || "🎮"; if(g.emojiColor) em.style.color = g.emojiColor;
+        const nm = document.createElement("div"); nm.className = "name"; nm.textContent = g.name || "(untitled)";
+        a.append(em, nm);
+        els.prevGrid.appendChild(a);
+      });
+    }
+
+    function buildIndexHtml(){
+      const metas = (state.original.metas || []).join("\n  ");
+      const styles = state.original.styles || "";
+      const cards = state.games.map(g=>{
+        const styleAttr = (g.emojiColor || "").trim() ? ` style="color:${escapeHtml((g.emojiColor || "").trim())}"` : "";
+        return `      <a class="card" href="${escapeHtml((g.href || "").trim())}"><div class="emoji"${styleAttr}>${escapeHtml((g.emojiText || "").trim())}</div><div class="name">${escapeHtml((g.name || "").trim())}</div></a>`;
+      }).join("\n");
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  ${metas}
+  <title>${escapeHtml(state.original.docTitle || "Arcade! Hooray! — Menu")}</title>
+  <style>
+${styles}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">${escapeHtml(state.original.titleText || "Arcade! Hooray!")}</div>
+    <div class="subtitle">${state.original.subtitleHTML || ""}</div>
+    <div class="grid">
+${cards}
+    </div>
+  </div>
+</body>
+</html>`;
+    }
+
+    function renderCode(){
+      els.codePre.textContent = buildIndexHtml();
+      els.codePill.textContent = state.loadedName ? `Generated HTML from ${state.loadedName}` : "Generated HTML";
+    }
+
+    function renderAll(){
+      renderList();
+      renderEditor();
+      renderPreview();
+      renderCode();
+      updateSyncPill();
+    }
+
+    function downloadBlob(blob, filename){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    }
+
+    function downloadFile(text, filename){
+      downloadBlob(new Blob([text], { type:"text/html;charset=utf-8" }), filename);
+    }
+
+    function timestampName(prefix="index", ext="html"){
+      const d = new Date();
+      const pad = n=>String(n).padStart(2, "0");
+      return `${prefix}_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.${ext}`;
+    }
+
+    function bindEditor(){
+      const onAny = ()=>{
+        if(state.selected < 0) return;
+        const g = state.games[state.selected];
+        state.original.titleText = (els.inTitle.value || "").trim() || "Arcade! Hooray!";
+        state.original.subtitleHTML = els.inSubtitle.value || "";
+        g.name = (els.inName.value || "").trim();
+        g.href = (els.inHref.value || "").trim();
+        g.emojiText = (els.inEmoji.value || "").trim();
+        g.emojiColor = normalizeHex(els.inEmojiColor.value || "");
+        els.inEmojiColor.value = g.emojiColor;
+        renderAll();
+      };
+      [els.inTitle, els.inSubtitle, els.inName, els.inHref, els.inEmoji, els.inEmojiColor].forEach(el=>{
+        el.addEventListener("input", onAny);
+        el.addEventListener("change", onAny);
+      });
+    }
+
+    async function addGameUrl(urlField){
+      const raw = (urlField.value || "").trim();
+      if(!raw){ toast("Paste a URL first."); return; }
+      try{
+        const text = await fetchTextFromUrl(raw);
+        const existing = new Set(Array.from(state.gameFiles.values()).map(v=>v.name));
+        const name = uniqueName(nameFromUrl(raw), existing);
+        state.gameFiles.set(normName(name), { name, text });
+        urlField.value = "";
+        renderAll();
+        toast(`Added ${name}`);
+      }catch(err){
+        console.error(err);
+        toast("Couldn't load URL");
+      }
+    }
+
+    els.tabBuilder.addEventListener("click", ()=>selectTab("builder"));
+    els.tabCode.addEventListener("click", ()=>selectTab("code"));
+
+    els.fileInput.addEventListener("change", async e=>{
+      const f = e.target.files?.[0];
+      if(!f) return;
+      const text = await f.text();
+      state.loadedName = f.name;
+      state.gameFiles.clear();
+      els.filePill.textContent = f.name;
+      readIndexHtml(text);
+      toast("Index loaded");
+      e.target.value = "";
+    });
+
+    els.btnLoadIndexUrl.addEventListener("click", async ()=>{
+      const raw = (els.indexUrl.value || "").trim();
+      if(!raw){ toast("Paste a URL first."); return; }
+      els.btnLoadIndexUrl.disabled = true;
+      try{
+        const text = await fetchTextFromUrl(raw);
+        state.loadedName = nameFromUrl(raw);
+        state.gameFiles.clear();
+        els.filePill.textContent = state.loadedName;
+        readIndexHtml(text);
+        toast("Index loaded");
+      }catch(err){
+        console.error(err);
+        toast("Couldn't load URL");
+      }finally{
+        els.btnLoadIndexUrl.disabled = false;
+      }
+    });
+
+    els.gameFilesInput.addEventListener("change", async e=>{
+      const files = Array.from(e.target.files || []);
+      if(!files.length) return;
+      for(const f of files){
+        const txt = await f.text();
+        state.gameFiles.set(normName(f.name), { name:f.name, text:txt });
+      }
+      renderAll();
+      toast(`Loaded ${files.length} file${files.length === 1 ? "" : "s"}`);
+      e.target.value = "";
+    });
+
+    els.btnAddGameUrl.addEventListener("click", ()=>addGameUrl(els.gameUrl));
+    els.btnModalAddGameUrl.addEventListener("click", ()=>addGameUrl(els.modalGameUrl));
+
+    els.btnAdd.addEventListener("click", ()=>{
+      state.games.push(defaultGame());
+      state.selected = state.games.length - 1;
+      els.btnDownload.disabled = false;
+      setEditorEnabled(true);
+      renderAll();
+      toast("Added game");
+    });
+
+    els.btnDelete.addEventListener("click", ()=>{
+      if(state.selected < 0) return;
+      state.games.splice(state.selected, 1);
+      if(state.selected >= state.games.length) state.selected = state.games.length - 1;
+      setEditorEnabled(state.games.length > 0);
+      els.btnDownload.disabled = state.games.length === 0;
+      renderAll();
+      toast("Deleted");
+    });
+
+    els.btnDownload.addEventListener("click", ()=>{
+      if(!state.games.length) return;
+      downloadFile(buildIndexHtml(), timestampName("index", "html"));
+      toast("Downloaded");
+    });
+
+    els.btnCopy.addEventListener("click", async ()=>{
+      const txt = buildIndexHtml();
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast("Copied");
+      }catch{
+        const ta = document.createElement("textarea");
+        ta.value = txt;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try{ document.execCommand("copy"); toast("Copied"); }
+        catch{ toast("Copy failed"); }
+        ta.remove();
+      }
+    });
+
+    els.btnModalClose.addEventListener("click", ()=>showModal(false));
+    els.btnModalSkip.addEventListener("click", ()=>showModal(false));
+    els.modalOverlay.addEventListener("click", e=>{ if(e.target === els.modalOverlay) showModal(false); });
+
+    bindEditor();
+    renderAll();
+    updateSyncPill();
+    setEditorEnabled(false);
+    selectTab("builder");
+  </script>
+</body>
+</html>
